@@ -1,0 +1,1 @@
+colabfold_batch syne-3_segments.fa ./results --num-models 1 --amber --use-gpu-relax --model-type alphafold2_ptm
