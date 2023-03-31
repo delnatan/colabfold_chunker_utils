@@ -5,7 +5,7 @@ def open_multifile_alphafold_model(
         overlap=200,
         align_span=5,
 ):
-    from os import listdir
+    from os import listdir, path
     import re
 
     all_filenames = listdir(directory)
@@ -34,8 +34,9 @@ def open_multifile_alphafold_model(
     models = []
 
     for f in sorted_pdb_files:
+        full_fn = path.join(directory, f)
         open_next_model(
-            f, residues_per_file, overlap, align_span, models
+            full_fn, residues_per_file, overlap, align_span, models
         )
 
     from chimerax.core.commands import run
