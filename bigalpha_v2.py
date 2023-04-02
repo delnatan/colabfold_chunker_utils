@@ -71,8 +71,14 @@ def open_multifile_alphafold_model(
                 ))
 
         run(session, "rename #%s %s" % (str(root_model), prefix))
-        run(session, "light soft")
-        run(session, "view")
+
+    # change visual appearance
+    run(session, "color bfactor #%s palette alphafold" % model_id)
+    run(session,
+        "hide #%s cartoon; show #%s atoms; style #%s sphere" %
+        (model_id, model_id, model_id))
+    run(session, "light soft")
+    run(session, "view")
 
 
 def open_next_model(fn, residues_per_file, overlap, align_span, models):
@@ -80,12 +86,6 @@ def open_next_model(fn, residues_per_file, overlap, align_span, models):
 
     model = run(session, "open %s" % fn)[0]
     model_id = model.id_string
-
-    # adjust appearance
-    run(session, "color bfactor #%s palette alphafold" % model_id)
-    run(session,
-        "hide #%s cartoon; show #%s atoms; style #%s sphere" %
-        (model_id, model_id, model_id))
 
     # if the first segment has already been loaded:
     if models:
