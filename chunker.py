@@ -45,16 +45,21 @@ def save_chunks(sequence, id_str, segment_length, overlap_length, output_dir,
                 f.write("\n")
             f.write("\n")
 
-        return None
+        # do early termination of function (return nothing)
+        return
 
     nchunks = seqlength // chunk_step + 1
 
     outfilename = "%s_segments.fa" % (id_str)
 
+    # define end of sequence index (iterate until we reach the end)
+    e = 0
+    i = 0
     with open(output_dir / outfilename, "wt") as f:
-        for i in range(nchunks):
+        while e < seqlength:
             s = i * (segment_length - overlap_length)
             e = min(s + segment_length, seqlength)
+
             segment_sequence = sequence[s:e]
 
             # break sequence up to conform to 'line_width'
@@ -69,6 +74,9 @@ def save_chunks(sequence, id_str, segment_length, overlap_length, output_dir,
                 f.write("\n")
 
             f.write("\n")
+            
+            # increment chunk counter
+            i += 1
 
 
 def main():
