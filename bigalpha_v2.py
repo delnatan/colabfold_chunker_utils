@@ -126,17 +126,6 @@ def open_next_model(fn, residues_per_file, overlap, align_span, models):
         # renumber the residue of current model (after deletion)
         model.renumber_residues(model.residues, last_residue + 1)
 
-        # join the C-term of previous model to N-term of current model
-        # run(
-        #     session,
-        #     "build join peptide #%s:%d@C #%s:%d@N" % (
-        #         last_model.id_string,
-        #         residues_per_file,
-        #         model.id_string,
-        #         overlap + 1
-        #     )
-        # )
-
     models.append(model)
 
 
