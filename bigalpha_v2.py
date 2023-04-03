@@ -11,7 +11,7 @@ def open_multifile_alphafold_model(
     all_filenames = listdir(directory)
 
     # filename pattern to look for
-    fptn = r"^%s_seg(\d+)_.*\.pdb$" % (prefix)
+    fptn = r"^%s_seg(\d+)_.*_relaxed_.*\.pdb$" % (prefix)
     ptn = re.compile(fptn)
 
     segment_order = []
