@@ -1,12 +1,14 @@
 def open_multifile_alphafold_model(
-        session, prefix, directory=".",
-        combine=True,
-        residues_per_file=1400,
-        overlap=200,
-        align_span=5,
+    session,
+    prefix,
+    directory=".",
+    combine=True,
+    residues_per_file=1400,
+    overlap=200,
+    align_span=5,
 ):
-    from os import listdir, path
     import re
+    from os import listdir, path
 
     all_filenames = listdir(directory)
 
@@ -51,32 +53,35 @@ def open_multifile_alphafold_model(
         c_terms = []
         n_terms = []
 
-        for n in range(len(models)-1):
+        for n in range(len(models) - 1):
             c_terms.append(models[n].residues[-1].number)
-            n_terms.append(models[n+1].residues[0].number)
+            n_terms.append(models[n + 1].residues[0].number)
 
         # combine models by joining their termini
         model_numbers = sorted([int(m.id_string) for m in models])
+
         root_model = model_numbers[0]
 
         for i, (c_term, n_term) in enumerate(
-                zip(c_terms, n_terms), start=model_numbers[1]
+            zip(c_terms, n_terms), start=model_numbers[1]
         ):
-            run(session,
-                "build join peptide #%d:%d@C #%d:%d@N" % (
-                    root_model,
-                    c_term,
-                    i,
-                    n_term
-                ))
+            run(
+                session,
+                "build join peptide #%d:%d@C #%d:%d@N"
+                % (root_model, c_term, i, n_term),
+            )
 
         run(session, "rename #%s %s" % (str(root_model), prefix))
 
+    session.logger.info("Opened %d models." % (len(models)))
+
     # change visual appearance
     run(session, "color bfactor #%s palette alphafold" % model_id)
-    run(session,
-        "hide #%s cartoon; show #%s atoms; style #%s sphere" %
-        (model_id, model_id, model_id))
+    run(
+        session,
+        "hide #%s cartoon; show #%s atoms; style #%s sphere"
+        % (model_id, model_id, model_id),
+    )
     run(session, "light soft")
     run(session, "view")
 
@@ -92,36 +97,36 @@ def open_next_model(fn, residues_per_file, overlap, align_span, models):
         last_model = models[-1]
         last_residue = last_model.residues[-1].number
 
-        # align current model to the last one by 'align_span'sel 
+        # align current model to the last one by 'align_span'sel
         run(
             session,
-            "align #%s:%d-%d@CA to #%s:%d-%d@CA" % (
+            "align #%s:%d-%d@CA to #%s:%d-%d@CA"
+            % (
                 model.id_string,
                 overlap - align_span + 1,
                 overlap,
                 last_model.id_string,
                 last_residue - align_span + 1,
-                last_residue
-            )
+                last_residue,
+            ),
         )
 
         # replace bfactors of last model with the current segment
         for i in range(-align_span, 0):
             new_bfactor = model.residues[overlap + i].atoms[0].bfactor
-            session.logger.info("changing bfactor for residue %d from %f to %f" % (
-                models[-1].residues[i].number,
-                models[-1].residues[i].atoms[0].bfactor,
-                new_bfactor
-            ))
+            session.logger.info(
+                "changing bfactor for residue %d from %f to %f"
+                % (
+                    models[-1].residues[i].number,
+                    models[-1].residues[i].atoms[0].bfactor,
+                    new_bfactor,
+                )
+            )
             for atom in models[-1].residues[i].atoms:
                 atom.bfactor = new_bfactor
 
-
         # and delete the overlapping part of current model
-        run(
-            session,
-            "delete #%s:1-%d" % (model.id_string, overlap)
-        )
+        run(session, "delete #%s:1-%d" % (model.id_string, overlap))
 
         # renumber the residue of current model (after deletion)
         model.renumber_residues(model.residues, last_residue + 1)
@@ -131,17 +136,28 @@ def open_next_model(fn, residues_per_file, overlap, align_span, models):
 
 def register_command(session):
     from chimerax.core.commands import (
-        CmdDesc, register, StringArg, OpenFolderNameArg, BoolArg, IntArg
+        BoolArg,
+        CmdDesc,
+        IntArg,
+        OpenFolderNameArg,
+        StringArg,
+        register,
     )
-    desc = CmdDesc(required=[('prefix', StringArg)],
-                   keyword=[('directory', OpenFolderNameArg),
-                            ('combine', BoolArg),
-                            ('residues_per_file', IntArg),
-                            ('overlap', IntArg),
-                            ('align_span', IntArg)],
-                   synopsis='Open multifile AlphaFold model')
-    register('bigalpha', desc, open_multifile_alphafold_model,
-             logger=session.logger)
+
+    desc = CmdDesc(
+        required=[("prefix", StringArg)],
+        keyword=[
+            ("directory", OpenFolderNameArg),
+            ("combine", BoolArg),
+            ("residues_per_file", IntArg),
+            ("overlap", IntArg),
+            ("align_span", IntArg),
+        ],
+        synopsis="Open multifile AlphaFold model",
+    )
+    register(
+        "bigalpha", desc, open_multifile_alphafold_model, logger=session.logger
+    )
 
 
 register_command(session)
