@@ -36,22 +36,22 @@ def straighten(session, mobile_sel, mobile_terminal, noise=5.0):
         # find backbone C-alpha
         atom = res.find_atom("CA")
 
-        # handle proline differently (for now)
+        # list containing 'small side' atom w.r.t C-alpha
         small_side_atoms = []
 
+        # handle proline differently (for now)
         if res.name != "PRO":
-            # bond.smaller_side returns the atom that is on the smaller side
             for nb, bond in zip(atom.neighbors, atom.bonds):
-                # look at peptide bond atoms only (no beta-carbons)
                 if nb.name == "N":
                     small_side_atoms.append(bond.smaller_side.name)
                 elif nb.name == "C":
                     small_side_atoms.append(bond.smaller_side.name)
-
-            # residue is near N-term
+            # if we want to move the 'N' terminus
             if mobile_terminal == "N":
+                # residue is near N-term (phi & psi is the smaller side)
                 move_smaller = set(small_side_atoms) == {"N", "CA"}
             elif mobile_terminal == "C":
+                # residue is near C-term (phi & psi is the smaller side)
                 move_smaller = set(small_side_atoms) == {"CA", "C"}
 
             psi_assgn = random.normalvariate(mu=135.0, sigma=noise)
